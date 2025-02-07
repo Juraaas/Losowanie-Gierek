@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Fortune</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #wheel {
+            margin: 20px auto;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            position: relative;
+            border: 2px solid black;
+        }
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            background-color: lightblue;
+            transform-origin: 100% 100%;
+            clip-path: polygon(100% 100%, 100% 0, 0 0);
+        }
+    </style>
+</head>
+<body>
+    <h1>Wheel of Fortune for Board Games</h1>
+
+    <div>
+        <label>Wybierz kategorię gry:</label><br>
+        <input type="checkbox" id="strategiczne" value="Strategiczne"> Strategiczne
+        <input type="checkbox" id="szybkie" value="Szybkie"> Szybkie
+        <input type="checkbox" id="alkoholowe" value="Alkoholowe"> Alkoholowe
+        <input type="checkbox" id="coop" value="Coop"> Coop
+        <input type="checkbox" id="towarzy" value="Towarzy"> Towarzyskie
+        <input type="checkbox" id="kart" value="Kart"> Karcianki
+        <input type="checkbox" id="vs" value="versus"> Versus
+        <input type="checkbox" id="think" value="Przekminy"> Przekminy
+
+        <br>
+        <label>Wybierz liczbę graczy:</label><br>
+        <input type="checkbox" id="1v1" value="1na1"> 2 graczy
+        <input type="checkbox" id="trzy" value="3os"> 3 osoby
+        <input type="checkbox" id="cztery" value="4os"> 4 osoby
+        <input type="checkbox" id="piec" value="5os+"> 5 osob+
+
+        <br>
+        <label>Game Duration:</label><br>
+        <input type="checkbox" id="15min" value="+/- 15min"> +/- 15 min
+        <input type="checkbox" id="30min" value="Do 30 min"> Do 30 min
+        <input type="checkbox" id="1hour" value="Do godziny"> Do godziny
+        <input type="checkbox" id="2hours" value="Do 2 godzin"> Do 2 godzin
+        <input type="checkbox" id="all" value="Caly"> 2 godziny+
+        <br>
+        <button onclick="filterGames()">Filter</button>
+    </div>
+
+    <div id="filtered_games"></div>
+    <button id="spin_button" style="display: none;" onclick="spinWheel()">Spin the Wheel</button>
+    <div id="wheel"></div>
+    <h2 id="selected_game"></h2>
+
+    <script>
+        let filteredGames = [];
+
+        function filterGames() {
+            const gameTypes = [];
+            if (document.getElementById("strategiczne").checked) gameTypes.push("Strategiczne");
+            if (document.getElementById("szybkie").checked) gameTypes.push("Szybkie");
+            if (document.getElementById("alkoholowe").checked) gameTypes.push("Alkoholowe");
+            if (document.getElementById("coop").checked) gameTypes.push("Coop");
+            if (document.getElementById("towarzy").checked) gameTypes.push("Towarzy");
+            if (document.getElementById("kart").checked) gameTypes.push("Kart");
+            if (document.getElementById("vs").checked) gameTypes.push("Versus");
+            if (document.getElementById("think").checked) gameTypes.push("Przekminy");
+
+            const minPlayers = [];
+            if (document.getElementById("1v1").checked) minPlayers.push(2);
+            if (document.getElementById("trzy").checked) minPlayers.push(3);
+            if (document.getElementById("cztery").checked) minPlayers.push(4);
+            if (document.getElementById("piec").checked) minPlayers.push(5);
+
+            const playtime = [];
+            if (document.getElementById("15min").checked) playtime.push(15);
+            if (document.getElementById("30min").checked) playtime.push(30);
+            if (document.getElementById("1hour").checked) playtime.push(60);
+            if (document.getElementById("2hours").checked) playtime.push(120);
+            if (document.getElementById("all").checked) playtime.push(150);
+
+
+            fetch("/filter", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ game_types: gameTypes, min_players: minPlayers, playtime: playtime })
+            })
+            .then(response => response.json())
+            .then(data => {
+                filteredGames = data;
+                const gamesList = data.map(game => `<li>${game}</li>`).join("");
+                document.getElementById("filtered_games").innerHTML = `<ul>${gamesList}</ul>`;
+                if (data.length > 0) {
+                    document.getElementById("spin_button").style.display = "inline-block";
+                } else {
+                    document.getElementById("spin_button").style.display = "none";
+                }
+            });
+        }
+
+        function spinWheel() {
+    wheel.spin(() => {
+        fetch("/spin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ games: wheel.games })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("selected_game").innerText = "Wylosowana gra: " + data.selected_game;
+        });
+    });
+}
+
+        function drawWheel(items, selectedIndex) {
+            const wheel = document.getElementById("wheel");
+            wheel.innerHTML = "";
+            const numSegments = items.length;
+            const anglePerSegment = 360 / numSegments;
+
+            for (let i = 0; i < numSegments; i++) {
+                const segment = document.createElement("div");
+                segment.className = "segment";
+                segment.style.backgroundColor = i === selectedIndex ? "gold" : `hsl(${(i * 360) / numSegments}, 100%, 75%)`;
+                segment.style.transform = `rotate(${i * anglePerSegment}deg)`;
+                wheel.appendChild(segment);
+            }
+        }
+    </script>
+</body>
+</html>

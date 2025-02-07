@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.filters {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: left;
+}
+
+.filters label {
+    font-weight: 600;
+    display: block;
+    margin-top: 10px;
+}
+
+.filters input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    font-size: 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+#wheel-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+canvas {
+    border: 2px solid #343a40;
+    border-radius: 50%;
+    margin-top: 10px;
+}
+
+#selected_game {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 20px;
+    padding: 10px;
+    background: #ffc107;
+    border-radius: 8px;
+    display: inline-block;
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/styles.css">
+    <meta charset="UTF-8">
+    <title>Koło wybierania gierek</title>
+</head>
+<body>
+  <h1>Koło do losowania gierek by Juras</h1>
+  <div>
+    <label>Wybierz kategorię gry:</label><br>
+    <input type="checkbox" id="strategiczne" value="Strategiczne"> Strategiczne
+    <input type="checkbox" id="alkoholowe" value="Alkoholowe"> Alkoholowe
+    <input type="checkbox" id="coop" value="Coop"> Coop
+    <input type="checkbox" id="towarzy" value="Towarzy"> Towarzyskie
+    <input type="checkbox" id="kart" value="Karcianki"> Karcianki
+    <input type="checkbox" id="vs" value="Versus"> Versus
+    <input type="checkbox" id="think" value="Przekminy"> Przekminy
+    <input type="checkbox" id="luz" value="Luzne"> Luźne
+    <input type="checkbox" id="deck" value="Deckbuilding"> Deckbuilding
+    <input type="checkbox" id="ofa" value="OFA"> Każdy na każdego
+    <input type="checkbox" id="eco" value="Ekonomia"> Ekonomia
+    <input type="checkbox" id="wild" value="Wildcard"> Wildcard
+
+    <br>
+    <label>Wybierz liczbę graczy:</label><br>
+    <input type="checkbox" id="1v1" value="1na1"> 2 graczy
+    <input type="checkbox" id="trzy" value="3os"> 3 osoby
+    <input type="checkbox" id="cztery" value="4os"> 4 osoby
+    <input type="checkbox" id="piec" value="5os"> 5 osob
+    <input type="checkbox" id="szesc" value="6os"> 6 osob
+
+    <br>
+    <label>Game Duration:</label><br>
+    <input type="checkbox" id="15min" value="+/- 15min"> +/- 15 min
+    <input type="checkbox" id="30min" value="Do 30 min"> Do 30 min
+    <input type="checkbox" id="1hour" value="Do godziny"> Do godziny
+    <input type="checkbox" id="2hours" value="Do 2 godzin"> Do 2 godzin
+    <input type="checkbox" id="all" value="Caly"> 2 godziny+
+    <br>
+    <button onclick="filterGames()">Filter</button>
+  </div>
+
+  <div id="filtered_games"></div>
+  <button id="spin_button" style="display: none;" onclick="spinWheel()">No zakręć no</button>
+
+  <canvas id="myCanvas" width="700" height="700" style="border: 0px solid;"></canvas>
+
+  <h2 id="selected_game"></h2>
+
+  <script src="/static/wheel.js"></script>
+  <script>
+    const ctx = myCanvas.getContext("2d");
+    const center = { x: myCanvas.width / 2, y: myCanvas.height / 2 };
+    const radius = myCanvas.width * 0.4;
+    let wheel = new Wheel(center, radius);
+    wheel.draw(ctx);
+
+    function filterGames() {
+        const gameTypes = [];
+        if (document.getElementById("strategiczne").checked) gameTypes.push("Strategiczne");
+        if (document.getElementById("alkoholowe").checked) gameTypes.push("Alkoholowe");
+        if (document.getElementById("coop").checked) gameTypes.push("Kooperacyjne");
+        if (document.getElementById("towarzy").checked) gameTypes.push("Towarzyskie");
+        if (document.getElementById("kart").checked) gameTypes.push("Karciane");
+        if (document.getElementById("vs").checked) gameTypes.push("Versus");
+        if (document.getElementById("think").checked) gameTypes.push("Przekminy");
+        if (document.getElementById("luz").checked) gameTypes.push("Luzne");
+        if (document.getElementById("deck").checked) gameTypes.push("Deckbuilding");
+        if (document.getElementById("ofa").checked) gameTypes.push("OFA");
+        if (document.getElementById("eco").checked) gameTypes.push("Ekonomia");
+        if (document.getElementById("wild").checked) gameTypes.push("Wildcard");
+
+
+        const minPlayers = [];
+        if (document.getElementById("1v1").checked) minPlayers.push(2);
+        if (document.getElementById("trzy").checked) minPlayers.push(3);
+        if (document.getElementById("cztery").checked) minPlayers.push(4);
+        if (document.getElementById("piec").checked) minPlayers.push(5);
+        if (document.getElementById("szesc").checked) minPlayers.push(6);
+
+        const playtime = [];
+        if (document.getElementById("15min").checked) playtime.push(15);
+        if (document.getElementById("30min").checked) playtime.push(30);
+        if (document.getElementById("1hour").checked) playtime.push(60);
+        if (document.getElementById("2hours").checked) playtime.push(120);
+        if (document.getElementById("all").checked) playtime.push(150);
+
+        fetch("/filter", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ game_types: gameTypes, min_players: minPlayers, playtime: playtime })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.length > 0) {
+                document.getElementById("spin_button").style.display = "inline-block";
+            } else {
+                document.getElementById("spin_button").style.display = "none";
+            }
+
+            wheel.updateGames(data);
+        });
+    }
+
+    function spinWheel() {
+    wheel.spin((selectedGame) => {
+        document.getElementById("selected_game").innerText = "Wylosowana gra: " + selectedGame.nazwa;
+
+        fetch("/spin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ selected_game: selectedGame.nazwa }),
+        });
+    });
+}
+  </script>
+</body>
+</html>
