@@ -1,11 +1,12 @@
+import os
 from flask import Flask, render_template, request, jsonify, Response
 from functools import wraps
 import random
 
 app = Flask(__name__)
 
-USERNAME = "jenger"
-PASSWORD = "gierki"
+USERNAME = os.getenv("AUTH_USERNAME")
+PASSWORD = os.getenv("AUTH_PASSWORD")
 
 games = [
     {"nazwa": "Siedem cudów pojedynek", "typ": ["Versus"], "players": [2], "dlugosc": [30, 45]},
