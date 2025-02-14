@@ -1,1 +1,2 @@
-# Losowanie-Gierek
+# Board games wheel decide Project
+This project contains web application designed for personalized usage. The goal was to implement deciding wheel with inputs based on filters for games. Categories of filters includes: game length, number of players, game type. In conclusuion this was a fun way of doing a system for a purpose of choosing different games for evenings with friends and practice a little of python, js and css. 
